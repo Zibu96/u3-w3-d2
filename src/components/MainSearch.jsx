@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Container, Row, Col, Form } from "react-bootstrap";
+import { Container, Row, Col, Form, Alert } from "react-bootstrap";
 import Job from "./Job";
 import { Link } from "react-router-dom";
 import { searchJobAction } from "../redux/actions";
@@ -9,7 +9,9 @@ const MainSearch = () => {
   const dispatch = useDispatch();
   const [query, setQuery] = useState("");
   const searchJob = useSelector((state) => state.searchJob.content);
-
+  const hasError = useSelector((state) => state.searchJob.hasError);
+  const errorMessage = useSelector((state) => state.searchJob.errorMessage);
+  console.log(query);
   // const baseEndpoint =
   //   "https://strive-benchmark.herokuapp.com/api/jobs?search=";
 
@@ -19,9 +21,9 @@ const MainSearch = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(searchJobAction("query"));
+    dispatch(searchJobAction(query));
   };
-
+  console.log(hasError);
   //   try {
   //     const response = await fetch(baseEndpoint + query + "&limit=20");
   //     if (response.ok) {
@@ -44,6 +46,7 @@ const MainSearch = () => {
         <Col xs={10} className="mx-auto">
           <Form onSubmit={handleSubmit}>
             <Form.Control
+              required
               type="search"
               value={query}
               onChange={handleChange}
@@ -51,13 +54,21 @@ const MainSearch = () => {
             />
           </Form>
         </Col>
-        <Col xs={10} className="mx-auto mb-5">
-          {searchJob &&
-            searchJob.map((jobData, i) => (
-              <Job key={jobData._id} data={jobData} i={i} />
-            ))}
-          <Link to={"company/favourite"}>Go to favourite </Link>
-        </Col>
+        {hasError ? (
+          <Col>
+            <Alert variant="danger">{errorMessage}</Alert>
+          </Col>
+        ) : (
+          <>
+            <Col xs={10} className="mx-auto mb-5">
+              {searchJob &&
+                searchJob.map((jobData, i) => (
+                  <Job key={jobData._id} data={jobData} i={i} />
+                ))}
+              <Link to={"company/favourite"}>Go to favourite </Link>
+            </Col>{" "}
+          </>
+        )}
       </Row>
     </Container>
   );
